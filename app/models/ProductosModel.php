@@ -156,4 +156,26 @@ class ProductosModel extends Model
 	    return DataBase::execute($sql, $params);
 	}
 
+	public static function traer_productos_codigo($producto)
+	{
+	    $model = new static();
+	    
+	    // Usamos LIKE para permitir coincidencias parciales y ordenamos para que los códigos exactos queden primero
+	    $sql = "SELECT * FROM productos 
+	            WHERE codigo_barras LIKE :codigo_like 
+	               OR nombre LIKE :nombre_like 
+	            ORDER BY (codigo_barras = :codigo_exacto) DESC 
+	            LIMIT 10";
+	            
+	    $params = [
+	        ':codigo_exacto' => $producto,
+	        ':codigo_like'   => '%' . $producto . '%',
+	        ':nombre_like'   => '%' . $producto . '%'
+	    ];
+
+	    $result = DataBase::query($sql, $params);
+
+	    return $result;
+	}
+
 }

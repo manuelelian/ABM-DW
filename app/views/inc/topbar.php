@@ -20,7 +20,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link fw-medium text-secondary px-3 rounded-3" href="#PATH#clientes">
+          <a class="nav-link fw-medium text-secondary px-3 rounded-3" href="">
             <i class="fa-solid fa-user me-1"></i> Clientes
           </a>
         </li>
@@ -32,6 +32,11 @@
         <li class="nav-item">
           <a class="nav-link fw-medium text-secondary px-3 rounded-3" href="">
             <i class="fa-solid fa-copyright me-1"></i> Marcas
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium text-secondary px-3 rounded-3" href="#PATH#ventas">
+            <i class="fa-solid fa-cart-shopping me-1"></i> Ventas
           </a>
         </li>
         <li class="nav-item">

@@ -10,7 +10,7 @@ use app\models\ProductosModel;
 class ProductosController extends Controller
 {
 
-	// Constructor (verificar si tenemos sesion activa)
+	// Constructor
 	public function __construct()
 	{
 		self::$sessionStatus = SessionController::sessionVerificacion();
@@ -18,7 +18,7 @@ class ProductosController extends Controller
 
 	public function actionIndex($var = null)
 	{
-		SessionController::onlyUsers();		
+		SessionController::onlyLogin();		
 		$productos = ProductosModel::traer_productos();
 		$sin_stock = ProductosModel::traer_sin_stock();
 		$stock_critico = ProductosModel::traer_stock_critico();
@@ -42,7 +42,7 @@ class ProductosController extends Controller
 
 	public function actioneditar_producto($id_producto)
 	{
-		SessionController::onlyUsers();		
+		SessionController::onlyLogin();		
 		$error = false;
         $mensajeOk = '';
         $mensajeNoOk = '';
@@ -143,7 +143,7 @@ class ProductosController extends Controller
 
 	public function actionagregar_producto()
 	{
-		SessionController::onlyUsers();		
+		SessionController::onlyLogin();		
 		$error = false;
         $mensajeOk = '';
         $mensajeNoOk = '';
@@ -242,7 +242,7 @@ class ProductosController extends Controller
 
 	public function actioneliminar_producto($id_producto)
 	{
-		SessionController::onlyUsers();
+		SessionController::onlyLogin();
 		$productos = ProductosModel::traer_productos_x_id($id_producto);
 
 		$eliminar_producto = ProductosModel::eliminar_producto($id_producto);		
@@ -260,4 +260,71 @@ class ProductosController extends Controller
         ]; 
         Response::render($this->viewDir(__NAMESPACE__), $nombre_de_archivoDeVista, $parametros_de_vista);
 	}
+
+    public function actionagregar_producto_lista()
+    {    
+        $producto = ProductosModel::traer_productos_x_id($_POST['id_producto']);
+
+        $idProducto_para_agregar = $_POST['id_producto'];
+
+        $_SESSION['productos_ventas'][$idProducto_para_agregar]['id'] = $idProducto_para_agregar;
+        $_SESSION['productos_ventas'][$idProducto_para_agregar]['nombre'] = $producto[0]->nombre;
+        $_SESSION['productos_ventas'][$idProducto_para_agregar]['codigo'] = $producto[0]->codigo_barras;
+        $_SESSION['productos_ventas'][$idProducto_para_agregar]['cantidad'] = $_POST['cantidad'];
+        $_SESSION['productos_ventas'][$idProducto_para_agregar]['precio'] = $producto[0]->precio_venta;
+        $_SESSION['productos_ventas'][$idProducto_para_agregar]['subtotal'] = $_POST['cantidad'] * $producto[0]->precio_venta;
+
+        $resultado['status'] = true;
+
+        echo json_encode($resultado);
+    }
+
+    public static function actionlistar_productos(){
+        $listaProductos = '';
+        $total = 0;
+        if (isset($_SESSION['productos_ventas'])) {
+            if (count($_SESSION['productos_ventas'])) {
+                foreach ($_SESSION['productos_ventas'] as $id => $datos) {
+                    $total += $datos['subtotal'];
+                    $listaProductos .= '
+                        <tr>
+                            <td class="ps-3 fw-medium text-dark">
+                              ' . $datos['nombre'] . '
+                              <div class="small text-muted font-monospace">' . $datos['codigo'] . '</div>
+                            </td>
+                            <td class="text-center">
+                              <span class="badge bg-light text-dark border px-2 py-1 font-monospace fw-bold">
+                                '.$datos['cantidad'].'
+                              </span>
+                            </td>
+                            <td class="text-end font-monospace text-secondary">$'.number_format($datos['precio'],2,',','.').'</td>
+                            <td class="text-end font-monospace fw-bold text-dark">$'.number_format($datos['subtotal'],2,',','.').'</td>
+                            <td class="pe-3 text-center">
+                              <button type="button" class="btn btn-outline-danger btn-sm rounded-3 px-2 py-1" title="Eliminar ítem" onclick="eliminar_de_lista(\''.$id.'\')">
+                                <i class="fa-solid fa-trash-can"></i>
+                              </button>
+                            </td>
+                      </tr>';
+                }
+
+            }
+        }
+
+        $array['productos_lista'] = $listaProductos;
+        $_SESSION['total_final'] = $total;
+        $array['total'] = '$' .number_format($total, 2, ',', '.');
+        echo json_encode($array);
+    }
+
+    public function actioneliminar_lista(){
+        // $_SESSION['sub_compra']['productos']
+        $idProducto_para_eliminar = $_POST['id_producto'];
+
+        unset($_SESSION['productos_ventas'][$idProducto_para_eliminar]);
+
+        $resultado['status'] = true;
+
+        echo json_encode($resultado);
+    }
+
 }

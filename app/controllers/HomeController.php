@@ -19,7 +19,7 @@ class HomeController extends Controller
 
 	public function actionIndex($var = null)
 	{
-		SessionController::onlyUsers();		
+		SessionController::onlyLogin();		
 
 		$usuarios = UserModel::getAllUsers();
 		var_dump($usuarios);
